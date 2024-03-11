@@ -2,8 +2,8 @@
  * @jest-environment jsdom
  */
 
-import mockStore from "../__mocks__/store"
-import {screen, waitFor, within} from '@testing-library/dom'
+import mockStore from '../__mocks__/store'
+import {screen, waitFor} from '@testing-library/dom'
 import BillsUI from '../views/BillsUI.js'
 import {bills} from '../fixtures/bills'
 import {ROUTES, ROUTES_PATH} from '../constants/routes';

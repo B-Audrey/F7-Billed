@@ -90,7 +90,6 @@ describe('Given I am connected as an employee', () => {
             await waitFor(() => screen.getByTestId('form-new-bill'))
             const newBill = getNewBillUI()
             const onNavigateSpy = jest.spyOn(newBill, 'handleSubmit');
-            const updateBillSpy = jest.spyOn(newBill, 'updateBill');
             const form = screen.getByTestId('form-new-bill');
             const submitFn = jest.fn(newBill.handleSubmit);
             form.addEventListener('submit', submitFn);
