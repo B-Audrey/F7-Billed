@@ -20,6 +20,10 @@ describe('Given I am connected as an employee', () => {
         document.body.innerHTML = NewBillUI()
     });
 
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
     describe('When I am on NewBill Page', () => {
         test('Then envelope icon in vertical layout should be highlighted', async () => {
             document.body.innerHTML = '<div id="root"></div>';
@@ -30,7 +34,7 @@ describe('Given I am connected as an employee', () => {
             expect(windowIcon.className).toBe('active-icon')
         })
         test('Then I can upload a new file on the file input', async () => {
-            const newBill = getNewBill()
+            const newBill = getNewBillUI()
             const fileChange = attachFile(newBill);
             await waitFor(() => {
                 expect(fileChange).toHaveBeenCalled();
@@ -38,7 +42,7 @@ describe('Given I am connected as an employee', () => {
         })
 
         test('Then my file will be refused if the format is not valid', async () => {
-            const newBill = getNewBill()
+            const newBill = getNewBillUI()
             const fileInput = screen.getByTestId('file');
             const handleFileChange = jest.fn(newBill.handleChangeFile);
             fileInput.addEventListener('change', handleFileChange);
@@ -54,24 +58,10 @@ describe('Given I am connected as an employee', () => {
 
     test('Then the bill should be submitted with correct data', async () => {
         await waitFor(() => screen.getByTestId('form-new-bill'))
-        const newBill = getNewBill()
+        const newBill = getNewBillUI()
         const handleSubmitSpy = jest.spyOn(newBill, 'handleSubmit');
         const updateBillSpy = jest.spyOn(newBill, 'updateBill');
-        const onNavigateSpy = jest.spyOn(newBill, 'onNavigate');
-        const expenseType = screen.getByTestId('expense-type');
-        expenseType.value = 'Transports';
-        const expenseName = screen.getByTestId('expense-name');
-        expenseName.value = 'test';
-        const datePicker = screen.getByTestId('datepicker');
-        datePicker.value = '2021-01-01';
-        const amount = screen.getByTestId('amount');
-        amount.value = '100';
-        const vat = screen.getByTestId('vat');
-        vat.value = '20';
-        const pct = screen.getByTestId('pct');
-        pct.value = '20';
-        const commentary = screen.getByTestId('commentary');
-        commentary.value = 'test';
+        fillForm();
         const fileChange = attachFile(newBill);
         await waitFor(() => {
             expect(fileChange).toHaveBeenCalled();
@@ -94,11 +84,28 @@ describe('Given I am connected as an employee', () => {
             fileName: '',
             status: 'pending'
         });
-        expect(onNavigateSpy).toHaveBeenCalledWith(ROUTES_PATH['Bills']);
+    });
+    describe('When I submit my new Bill', () => {
+        test('Then I should be redirected to Bills page', async () => {
+            await waitFor(() => screen.getByTestId('form-new-bill'))
+            const newBill = getNewBillUI()
+            const onNavigateSpy = jest.spyOn(newBill, 'handleSubmit');
+            const updateBillSpy = jest.spyOn(newBill, 'updateBill');
+            const form = screen.getByTestId('form-new-bill');
+            const submitFn = jest.fn(newBill.handleSubmit);
+            form.addEventListener('submit', submitFn);
+            fillForm();
+            const fileChange = attachFile(newBill);
+            await waitFor(() => {
+                expect(fileChange).toHaveBeenCalled();
+            });
+            fireEvent.submit(form);
+            expect(onNavigateSpy).toHaveBeenCalled();
+        });
     });
 })
 
-const getNewBill = () => {
+const getNewBillUI = () => {
     return new NewBill({
         document,
         onNavigate,
@@ -118,3 +125,12 @@ const attachFile = (newBill) => {
     fireEvent.change(fileInput, {target: {files: [file]}});
     return handleFileChange;
 };
+const fillForm = () => {
+    screen.getByTestId('expense-type').value = 'Transports';
+    screen.getByTestId('expense-name').value = 'test';
+    screen.getByTestId('datepicker').value = '2021-01-01';
+    screen.getByTestId('amount').value = '100';
+    screen.getByTestId('vat').value = '20';
+    screen.getByTestId('pct').value = '20';
+    screen.getByTestId('commentary').value = 'test';
+}
