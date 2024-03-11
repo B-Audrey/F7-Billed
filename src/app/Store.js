@@ -39,7 +39,7 @@ class ApiEntity {
     return await (this.api.get({url: `/${this.key}/${selector}`, headers: getHeaders(headers)}))
   }
   async list({headers = {}} = {}) {
-    return await (this.api.get({url: `/${this.key}`, headers: getHeaders(headers)}))
+    return await (this.api.get({url: `/${this.key}`, headers: getHeaders(headers)}));
   }
   async update({data, selector, headers = {}}) {
     return await (this.api.patch({url: `/${this.key}/${selector}`, headers: getHeaders(headers), data}))
@@ -63,10 +63,12 @@ class Store {
   users = () => new ApiEntity({key: 'users', api: this.api})
   login = (data) => this.api.post({url: '/auth/login', data, headers: getHeaders({noAuthorization: true})})
 
-  ref = (path) => this.store.doc(path)
+  // ref = (path) => this.store.doc(path)
 
   bill = bid => (new ApiEntity({key: 'bills', api: this.api})).select({selector: bid})
-  bills = () => new ApiEntity({key: 'bills', api: this.api})
+  bills = () => {
+    return new ApiEntity({key: 'bills', api: this.api})
+  }
 }
 
 export default new Store()
