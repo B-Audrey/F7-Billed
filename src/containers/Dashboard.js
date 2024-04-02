@@ -72,10 +72,12 @@ export default class {
         this.document = document
         this.onNavigate = onNavigate
         this.store = store
+        //add this current Data
         this.currentData = [
             {id: 1, isOpen: false},
             {id: 2, isOpen: false,},
             {id: 3, isOpen: false}]
+        this.currentBillId = ''
         $('#arrow-icon1').click((e) => this.handleShowTickets(e, bills, 1))
         $('#arrow-icon2').click((e) => this.handleShowTickets(e, bills, 2))
         $('#arrow-icon3').click((e) => this.handleShowTickets(e, bills, 3))
@@ -90,18 +92,21 @@ export default class {
     }
 
     handleEditTicket(e, bill, bills) {
-        if (this.currentData.id === bill.id && this.currentData.isOpen) {
+        // si la facture est déjà ouverte : son id est égal à l'id de la facture courante
+        // donc on ferme la facture et on ajuste son style
+        if (this.currentBillId === bill.id) {
             $(`#open-bill${bill.id}`).css({background: '#0D5AE5'})
             $('.dashboard-right-container div').html(`<div id="big-billed-icon" data-testid="big-billed-icon"> ${BigBilledIcon} </div>`)
             $('.vertical-navbar').css({height: '120vh'})
-            this.currentData.isOpen = false
+            this.currentBillId = ''
         } else {
-            this.currentData.id = bill.id
-            this.currentData.isOpen = true
+            // sinon on ouvre la facture et on modifie l'objet courant avec sa nouvelle valeur ouvert
+            // on ajuste son style
             bills.forEach(b => $(`#open-bill${b.id}`).css({background: '#0D5AE5'}))
             $(`#open-bill${bill.id}`).css({background: '#2A2B35'})
             $('.dashboard-right-container div').html(DashboardFormUI(bill))
             $('.vertical-navbar').css({height: '150vh'})
+            this.currentBillId = bill.id
         }
         $('#icon-eye-d').click(this.handleClickIconEye)
         $('#btn-accept-bill').click((e) => this.handleAcceptSubmit(e, bill))
@@ -129,8 +134,15 @@ export default class {
     }
 
     handleShowTickets(e, bills, index) {
+        // on récupère les factures correspondant à l'index
         const actualBills = filteredBills(bills, getStatus(index))
+        // on récupère l'index de l'objet correspondant à l'index courant
         const i = this.currentData.findIndex(obj => obj.id === index)
+        // si l'objet correspondant à l'index courant n'est pas ouvert
+        // on ouvre les factures correspondantes à l'index courant
+        // on modifie l'objet correspondant à l'index courant avec sa nouvelle valeur ouvert
+        // on ajuste son style
+        // on ajoute un event listener sur chaque facture pour pouvoir les ouvrir
         if (!this.currentData[i].isOpen) {
             $(`#arrow-icon${index}`).css({transform: 'rotate(0deg)'})
             $(`#status-bills-container${index}`).html(cards(actualBills))
@@ -139,6 +151,9 @@ export default class {
                 $(`#open-bill${bill.id}`).click((e) => this.handleEditTicket(e, bill, bills))
             })
         } else {
+            // sinon on ferme les factures correspondantes à l'index courant
+            // on ajuste son style
+            // on modifie l'objet correspondant à l'index courant avec sa nouvelle valeur fermé
             $(`#arrow-icon${index}`).css({transform: 'rotate(90deg)'})
             $(`#status-bills-container${index}`).html('')
             this.currentData[i].isOpen = false

@@ -1,4 +1,5 @@
 import VerticalLayout from './VerticalLayout.js'
+import ErrorPage from './ErrorPage.js';
 
 export default () => {
 
@@ -63,6 +64,7 @@ export default () => {
               <div class="col-md-6">
                 <div class="col-half">
                   <button type="submit" id='btn-send-bill' data-testid="btn-send-bill" class="btn btn-primary">Envoyer</button>
+                  <p class="error-style" id="error-message" data-testid="error-message"></p>
                 </div>
               </div>
             </div>

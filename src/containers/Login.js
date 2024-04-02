@@ -37,6 +37,7 @@ export default class Login {
 
   }
 
+  //recupération des données du formulaire admin et pas employee
   handleSubmitAdmin = e => {
     e.preventDefault()
     const user = {

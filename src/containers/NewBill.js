@@ -19,41 +19,23 @@ export default class NewBill {
     handleChangeFile = e => {
         e.preventDefault()
         let file = this.document.querySelector(`input[data-testid="file"]`).files[0]
-        const filePath = e.target.value.split(/\\/g)
-        const fileName = filePath[filePath.length - 1]
+        // vérification que le fichier est de type jpg, jpeg ou png
+        // si ce n'est pas le cas, on vide le champ et on affiche une alerte
+        // on recréé le html de l'input pour en recréer un vide
         if (file.type !== 'image/jpeg' && file.type !== 'image/png' && file.type !== 'image/jpg') {
-            file.value = ''
             this.document.querySelector(`input[data-testid="file"]`).parentNode.innerHTML = '<label for="file" class="bold-label">Justificatif</label><input required type="file" class="form-control blue-border" data-testid="file" />';
             this.document.querySelector(`input[data-testid="file"]`).addEventListener('input', this.handleChangeFile)
             return window.alert('Votre format de fichier est invalide.\nVeuillez le modifier par un fichier ayant l\'extension .png, .jpg ou .jpeg ppur pouvoir enregistrer')
         }
-        const formData = new FormData()
-        const email = JSON.parse(localStorage.getItem('user')).email
-        formData.append('file', file)
-        formData.append('email', email)
-        this.store
-            .bills()
-            .create({
-                data: formData,
-                headers: {
-                    noContentType: true
-                }
-            })
-            .then(({fileUrl, key}) => {
-                this.billId = key
-                this.fileUrl = fileUrl
-                this.fileName = fileName
-            }).catch(error => console.error(error))
     }
     handleSubmit = e => {
         e.preventDefault()
         let email = JSON.parse(localStorage.getItem('user')).email
-        if(!email){
-            const userString = localStorage.getItem('user');
-            const user = JSON.parse(JSON.parse(userString));
-            email = user.email;
-
-        }
+        let file = e.target.querySelector(`input[data-testid="file"]`).files[0]
+        const fileName = file.name
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('email', email)
         const bill = {
             email,
             type: e.target.querySelector(`select[data-testid="expense-type"]`).value,
@@ -67,9 +49,26 @@ export default class NewBill {
             fileName: this.fileName,
             status: 'pending'
         }
-        console.log('bill', bill)
-        this.updateBill(bill)
-        this.onNavigate(ROUTES_PATH['Bills'])
+        if (bill.date === '') return window.alert('Veuillez renseigner une date')
+        if (bill.pct > 100 || bill.pct < 0) return window.alert('Le taux de TVA doit être compris entre 0 et 100')
+        if (bill.amount <= 0) return window.alert('Le montant doit être supérieur à 0')
+        this.store
+            .bills()
+            .create({
+                data: formData,
+                headers: {
+                    noContentType: true
+                }
+            })
+            .then(({fileUrl, key}) => {
+                this.billId = key
+                this.fileUrl = fileUrl
+                this.fileName = fileName
+                this.updateBill(bill)
+            }).catch((error) => {
+            document.querySelector(`#error-message`).innerText = `Votre facture n'a pas pu être envoyée : ${error.message}`
+            return console.error(error);
+        })
     }
 
 
@@ -82,7 +81,9 @@ export default class NewBill {
                 .then(() => {
                     this.onNavigate(ROUTES_PATH['Bills'])
                 })
-                .catch(error => console.error(error))
+                .catch(error => {
+                    return console.error(error)
+                })
         }
     }
 }
