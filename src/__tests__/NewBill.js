@@ -95,7 +95,7 @@ describe('Given I am connected as an employee', () => {
             });
             fireEvent.submit(form);
             expect(onNavigateSpy).toHaveBeenCalled();
-            //todo VOIR LA NAVIGATION ICI : BON OU PAS ?
+
         });
         // test d'integration sur le POST de la création d'une nouvelle note de frais
         test('Then new Bill should be POSTED', async () => {

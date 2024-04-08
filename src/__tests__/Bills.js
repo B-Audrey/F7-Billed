@@ -121,7 +121,7 @@ describe('Given I am connected as an employee', () => {
             newBillButton.addEventListener('click', handleNewBillClick)
             userEvent.click(newBillButton)
             expect(handleNewBillClick).toHaveBeenCalled()
-            //todo VOIR LA NAVIGATION ICI : tester que la redirection fonctionne
+            expect(screen.getByText('Envoyer une note de frais')).toBeTruthy()
         });
 
     })
